@@ -1,0 +1,6 @@
+{
+ "TARGET_TRDEMO_CLIENT": "http://trdemo-client",
+ "TARGET_TRDEMO_FLIGHTS": "http://trdemo-flights",
+ "TARGET_TRDEMO_SHOPPINGCART": "http://trdemo-shoppingcart",
+ "TARGET_TRDEMO_USERS": "http://trdemo-users"
+}

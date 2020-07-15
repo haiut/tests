@@ -1,0 +1,28 @@
+{
+ "parameters": [
+  {
+   "name": "product_id",
+   "uuid": "090bd73f-b1a0-48a7-a8cb-194354b2e7b3"
+  },
+  {
+   "name": "source",
+   "uuid": "522e3f92-c51f-40ec-9778-a117975144dd"
+  },
+  {
+   "name": "startDate",
+   "uuid": "bcfd678e-7baa-45bb-9733-5707796cf010"
+  }
+ ],
+ "rows": [
+  {
+   "product_id": "LH-257",
+   "source": "FRA",
+   "startDate": "2019-07-02"
+  },
+  {
+   "product_id": "LY-057",
+   "source": "*",
+   "startDate": "2019-07-02"
+  }
+ ]
+}
