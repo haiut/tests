@@ -10,6 +10,7 @@ import logging
 import os
 import random
 import re
+import struct
 import sys
 import threading
 import time
@@ -28,7 +29,7 @@ from requests.cookies import merge_cookies, cookiejar_from_dict
 from requests.structures import CaseInsensitiveDict
 
 import apiritif
-from apiritif import http
+from apiritif import http, recorder
 from apiritif.http import HTTPTarget
 
 # the below block is just to avoid "unused import" in IDE
@@ -344,3 +345,59 @@ def timeout_scope(to):
             watcher.canceled = True
 
     yield from wrapper()
+
+
+def _protobuf_action(message, spec, action):
+    for field_no in spec.split('.'):
+        field_no = int(field_no)
+        field = message.DESCRIPTOR.fields_by_number[field_no]
+        if field.type == field.TYPE_MESSAGE:
+            message = getattr(message, field.name)
+            if field.label == field.LABEL_REPEATED:
+                message = message.add()
+            continue
+        else:
+            return action(message, field.name)
+    else:
+        raise KeyError("Failed to find field in protobuf: %s", spec)
+
+
+def apply_into_protobuf(message, spec, value):
+    def set_val(message, field_name):
+        setattr(message, field_name, value)
+
+    _protobuf_action(message, spec, set_val)
+
+
+def grpc_frame(data):
+    return b'\x00' + struct.pack(">I", len(data)) + data
+
+
+def grpc_unframe(data):
+    is_compressed = data[0]
+    assert not is_compressed, "Compressed GRPC frames are not supported"
+    size = struct.unpack(">I", data[1:5])[0]
+    data = data[5:]
+
+    if len(data) > size:
+        logging.warning("More than one message in GRPC payload is not supported, taking first")
+        data = data[:size]
+    return data
+
+
+@recorder.assertion_decorator
+def assert_grpc(resp, spec, expected_value=None):
+    def do_assert(message, field_name):
+        val = getattr(message, field_name)
+        if expected_value is not None and val != expected_value:
+            msg = "GRPC field (%r) value %r didn't match expected value: %s" % (field_name, val, expected_value)
+            raise AssertionError(msg)
+
+    _protobuf_action(resp.msg, spec, do_assert)
+
+
+def from_grpc_fields(spec, resp):
+    def do_extract(message, field_name):
+        return getattr(message, field_name)
+
+    return _protobuf_action(resp.msg, spec, do_extract)

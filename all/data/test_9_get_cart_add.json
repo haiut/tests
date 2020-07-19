@@ -1,0 +1,18 @@
+{
+ "parameters": [
+  {
+   "name": "product_id",
+   "uuid": "4b9e29df-fb9e-4943-a435-457c9b1fd5b5"
+  },
+  {
+   "name": "startDate",
+   "uuid": "0f17e282-9bcf-40ff-81b8-4680947ca3b5"
+  }
+ ],
+ "rows": [
+  {
+   "product_id": "UA-301",
+   "startDate": "2019-07-16"
+  }
+ ]
+}
